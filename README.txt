@@ -1,3 +1,7 @@
+Download precompiled system with all dependencies: https://github.com/timfeu/berkeleycoref-thesaurus/releases/download/v1.0/berkeleycoref-1.0d.zip
+
+Bansal & Klein feature extractors: https://github.com/timfeu/berkeleycoref-bansalklein
+
 --------
 Preamble
 --------
