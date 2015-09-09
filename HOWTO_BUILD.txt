@@ -1,0 +1,45 @@
+**********************
+Building instructions
+**********************
+
+To build the project, you require Scala Build Tool (SBT), available from http://www.scala-sbt.org/ and
+provided by the repositories of many linux distributions. The appropriate Scala compiler
+for the target version will be automatically downloaded by SBT.
+
+You have two options to build the source code.
+
+=============
+Standalone
+=============
+For training and evaluation it is recommended to use the standalone version. The
+class edu.berkeley.nlp.coref.Driver is the entrypoint for the resulting jar.
+
+The standalone version can be obtained by running
+
+sbt pack
+
+in the base directory. You find the results in target/pack. You can run the system from the
+script files in the target/pack/bin directory. JVM options (like "-Xmx20g" to reserve the necessary memory
+for training the system) should be providable by exporting the JVM_OPT variable before calling
+the script. In case this doesn't work, modify the script files directly (last lines running
+exec in "berkeleycoref" for Unix systems and line 92 in "berkeleycoref.bat" for Windows).
+
+=============
+Install
+=============
+The libraries from the standalone version can be added to your classpath to create UIMA applications
+as well. However, for cleaner project management we recommend using a build and dependency management
+tool like SBT or Maven. You can easily install the compiled jar to your local repository.
+
+For ivy2 (used by SBT), run:
+
+sbt publishLocal
+
+For Maven, run:
+
+sbt publish-m2
+
+You can then reference the project using group "org.jobimtext", artifact "berkeleycoref" and
+the version specified in the build.sbt (at the time of writing: 1.0, but should be modified
+to "1.0-SNAPSHOT" for development).
+

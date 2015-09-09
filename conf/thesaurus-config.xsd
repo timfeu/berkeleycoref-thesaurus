@@ -1,0 +1,361 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.jobimtext.org/coreference"
+xmlns="http://www.jobimtext.org/coreference"
+xmlns:db="http://www.jobimtext.org/database"
+elementFormDefault="qualified"
+xml:lang="en"
+version="0.1">
+
+  <xsd:import namespace="http://www.jobimtext.org/database"
+              schemaLocation="thesaurus-database.xsd" />
+
+  <xsd:annotation>
+    <xsd:documentation>
+     Configuration file for selecting thesasurus features and setting
+	 up the database connections.
+	 
+	 You can enable multiple thesauri to be used by the coreference system,
+	 each of them having different features enabled.
+	 
+	 The enabled features and thesaurus identifiers are stored in the
+	 model file to make sure that the feature set at prediction time
+	 includes all features used during training. You are free to change
+	 the database connection. Additional features not enabled in the
+	 model will be used internally to featurize the document, but will
+	 be ignored by the prediction unit.
+    </xsd:documentation>
+  </xsd:annotation>
+  
+  <xsd:element name="thesaurus-config" type="ThesaurusConfigType">
+  <xsd:unique name="thesaurusIdentifier">
+    <xsd:selector xpath="thesaurus" />
+	<xsd:field xpath="@id" />
+  </xsd:unique>
+  </xsd:element>
+  
+  <xsd:complexType name="ThesaurusConfigType">
+    <xsd:sequence>
+	  <xsd:element name="thesaurus" type="ThesaurusType" minOccurs="0" maxOccurs="unbounded" />
+	</xsd:sequence>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ThesaurusType">
+    <xsd:sequence>
+	  <xsd:element name="holingSystem" type="xsd:string">
+	    <xsd:annotation>
+		  <xsd:documentation>
+		  Fully qualified name of a class that implements the holing
+		  system to be used by this thesaurus. The class must extend
+		  the trait org.jobimtext.coref.berkeley.DistributionalThesaurusComputer
+		  and provide a public constructor taking the following arguments:
+		  
+		  val identifier: String - the name of the thesaurus from this configuration
+		  val cache: ThesaurusCache - the cache used by the parent trait
+		  val interface: IThesaurusDatastructure[String, String] - the database connection
+                                                       used by the parent trait
+		  val languagePack: CorefLanguagePack - the language pack used for language-specific
+		                                        actions
+												
+		  Consult the documentation of DistributionalThesaurusComputer
+		  to learn more about the methods that need to be overridden.
+	      
+		  The class must be present in the class path during runtime. The
+		  system comes with a few example implementations which can be used
+		  without modifying the class path. Note also that the standalone
+		  system adds any jar in the "lib" folder to the class path, which
+		  makes it a good place to store your holing system implementations.
+		  </xsd:documentation>
+		</xsd:annotation>
+	  </xsd:element>
+	  
+	  <xsd:element name="features" type="FeatureListType">
+	    <xsd:annotation>
+		  <xsd:documentation>
+		  List of features to enable for this thesaurus.
+		  </xsd:documentation>
+		</xsd:annotation>
+	  </xsd:element>
+	  
+	  <xsd:element name="antonymDatabase" type="AntonymDatabaseType">
+	    <xsd:annotation>
+		  <xsd:documentation>
+		  Connection information for the database containing incompatible terms.
+		  </xsd:documentation>
+		</xsd:annotation>
+	  </xsd:element>
+	  
+	  <xsd:element ref="db:databaseThesaurusConfiguration"  />
+	  
+	</xsd:sequence>
+	
+    <xsd:attribute name="id" type="xsd:string" use="required">
+	    <xsd:annotation>
+		  <xsd:documentation>
+		  Unique identifier for this thesaurus. You can use any name
+		  you want, however when loading a previously trained model,
+		  the names must match to pass the sanity check.
+		  </xsd:documentation>
+		</xsd:annotation>
+	  </xsd:attribute>
+	  
+	<xsd:attribute name="maxExpansions" type="xsd:positiveInteger" default="200">
+	    <xsd:annotation>
+		  <xsd:documentation>
+		  Size of the prior expansion offered by this thesaurus. The usual number is 200.
+		  The size affects the intervals chosen to discretize ranks. Expansions returned
+		  from the thesaurus interface will be cut after this limit as well.
+		  </xsd:documentation>
+		</xsd:annotation>
+	</xsd:attribute>
+  </xsd:complexType>
+  
+  <xsd:complexType name="FeatureListType">
+	  <xsd:choice minOccurs="0" maxOccurs="unbounded">
+	    <xsd:element name="feature" type="FeatureType" />
+	  </xsd:choice>
+  </xsd:complexType>
+  
+  <xsd:complexType name="FeatureType">
+		<xsd:simpleContent>
+		<xsd:extension base="FeatureName">
+		  <xsd:annotation>
+		    <xsd:documentation>
+			Specifies the parameters of a single feature.
+			</xsd:documentation>
+		  </xsd:annotation>
+		  
+		  <xsd:attribute name="target" type="MentionType" />
+		  
+		  <xsd:attribute name="expand" type="MentionType" />
+		  
+		  <xsd:attribute name="onlyOpen" type="xsd:boolean">
+		    <xsd:annotation>
+			  <xsd:documentation>
+			  The feature fires only if both mention heads are
+			  from an open class (proper or common noun).
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		  <xsd:attribute name="onlyClosed" type="xsd:boolean">
+		  <xsd:annotation>
+			  <xsd:documentation>
+			  The feature fires only if the EXPANDed mention's
+			  head is from a closed class (pronoun or demonstrative).
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		  	  <xsd:attribute name="limit" type="xsd:positiveInteger">
+		  <xsd:annotation>
+			  <xsd:documentation>
+			  Limits the number of expanded terms for the "inArc2ContextExpansion" feature.
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		 <xsd:attribute name="usePartnerContext" type="xsd:boolean" default="false">
+		  <xsd:annotation>
+			  <xsd:documentation>
+			  Only applicable to "rerankedExpansion". If true, the context of
+			  the TARGET term will be used instead of the EXPANDED term. Enabling
+			  this option increases computation time drastically.
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		  <xsd:attribute name="filter" type="xsd:boolean" default="true">
+		  <xsd:annotation>
+			  <xsd:documentation>
+			  Only applicable to "rerankedExpansion". If true, the context of the EXPANDED
+			  term will be filtered such that only content words (nouns, verbs and adjectives)
+			  remain. Disabling  this option increases computation time by a small margin.
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		  <xsd:attribute name="filter" type="xsd:boolean" default="true">
+		  <xsd:annotation>
+			  <xsd:documentation>
+			  If true and the feature has a positive result (true, > 0, etc.), adds an additional
+			  lexicalized version that captures a "hidden" term depending on the feature semantics.
+			  For "headsSharedIsas", adds a lexicalization of the most specific IS-A shared. In
+			  "isPropertyIsa", adds a lexicalization of the target.
+			  </xsd:documentation>
+			</xsd:annotation>
+		  </xsd:attribute>
+		  
+		  <xsd:attribute name="discretize" type="DiscretizationType" />
+		  
+		  </xsd:extension>
+          </xsd:simpleContent>
+		  </xsd:complexType>
+  
+    <xsd:simpleType name="MentionType">
+      <xsd:restriction base="xsd:string">
+	    <xsd:enumeration value="antecedent" />
+	    <xsd:enumeration value="current" />
+	  </xsd:restriction>
+	</xsd:simpleType>
+	
+	    <xsd:simpleType name="DiscretizationType">
+      <xsd:restriction base="xsd:string">
+	    <xsd:enumeration value="interval" />
+	    <xsd:enumeration value="boolean" />
+	  </xsd:restriction>
+	</xsd:simpleType>
+  
+  <xsd:simpleType name="FeatureName">
+    <xsd:restriction base="xsd:string">
+	  
+	  <xsd:enumeration value="hasExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Reports whether the current and antecedent mention have an expansion,
+			an example value would be "curr=true,ant=false". No attributes.
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  <xsd:enumeration value="hasExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Reports whether the current and antecedent mention have any IS-As,
+			an example value would be "curr=true,ant=false". No attributes.
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  	  <xsd:enumeration value="headsSharedIsas">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Reports the percentage of IS-As shared by the two mention terms.
+			Valid attributes: lexicalize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="incompatibleHeads">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Boolean feature whose value is true iff the heads of both mentions
+			are reported as incompatible by the antonym database. No attributes.
+			The threshold k of minimum occurrences in the antonym data is set
+			as a parameter of the coreference system's configuration.
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="incompatibleProperty">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Boolean feature whose value is true iff at least one pair of properties from both mentions
+			was reported as incompatible by the antonym database. No attributes.
+			The threshold k of minimum occurrences in the antonym data is set
+			as a parameter of the coreference system's configuration.
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="inArc2ContextExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Creates the context-based expansion (C-expansion) of EXPAND, takes the first
+			n content words (where n is defined by the "limit" attribute), and looks up
+			the TARGET term in the expansions of those content words. The best rank achieved
+			among those expansions is reported as the feature's value. Valid attributes: target,
+			expand, onlyClosed, limit, discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  	  
+	  <xsd:enumeration value="inContextExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Looks up the position of TARGET's term in the EXPAND term's context-based
+			expansion (C-expansion). Valid attributes: target, expand, onlyClosed, discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="isIsa">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Boolean feature whose value is true if the TARGET term is an IS-A of
+			the EXPANDed term. Only content words will be considered.
+			Valid attributes: target, expand
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="isPropertyIsa">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Reports true if the TARGET term is among any of the IS-As of the EXPAND term's
+			attributes.	Valid attributes: target, expand, lexicalize
+			discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  <xsd:enumeration value="priorExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Looks up the position of TARGET's term in the EXPAND term's prior
+			expansion. Valid attributes: target, expand, onlyOpen, discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  <xsd:enumeration value="rerankedExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Looks up the TARGET term in the EXPAND term's context-sensitive
+			expansion. Valid attributes: target, expand, onlyOpen, usePartnerContext,
+			filter, discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  <xsd:enumeration value="sharedPriorExpansionCount">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Reports the percentage of shared terms in the prior expansions of
+			both mentions. Valid attributes: onlyOpen
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  <xsd:enumeration value="SNPositionInOwnContextExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Anaphoricity feature. Reports the rank of the current mention's term
+			in its own context expansion. Valid attributes: onlyClosed, discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	  	  <xsd:enumeration value="propertiesInPriorExpansion">
+	      <xsd:annotation>
+		    <xsd:documentation>
+			Looks up the attributes of the TARGET term in the EXPAND term's
+			prior expansion and reports the best rank. Valid attributes: target, expand,
+			discretize
+			</xsd:documentation>
+		  </xsd:annotation>
+	  </xsd:enumeration>
+	  
+	</xsd:restriction>
+  </xsd:simpleType>
+  
+  <xsd:complexType name="AntonymDatabaseType">
+    <xsd:all>
+	  <xsd:element name="dbUrl" type="xsd:string" minOccurs="1" />
+	  <xsd:element name="dbUser" type="xsd:string" minOccurs="1" />
+	  <xsd:element name="dbPassword" type="xsd:string" minOccurs="1" />
+	  <xsd:element name="jdbcString" type="xsd:string" minOccurs="1" />
+	</xsd:all>
+  </xsd:complexType>
+
+</xsd:schema>

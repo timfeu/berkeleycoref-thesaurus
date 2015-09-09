@@ -1,0 +1,26 @@
+#begin document (in_raw/example.txt); part 000
+in_raw/example.txt	0	0	In	IN	(TOP(S(PP*	-	-	-	-	*	-
+in_raw/example.txt	0	1	another	DT	(NP*	-	-	-	-	*	-
+in_raw/example.txt	0	2	moment	NN	*))	-	-	-	-	*	-
+in_raw/example.txt	0	3	down	RB	(NP*)	-	-	-	-	*	-
+in_raw/example.txt	0	4	went	VBD	(VP*	-	-	-	-	*	-
+in_raw/example.txt	0	5	Alice	NNP	(NP*)	-	-	-	-	(MISC)	(1)
+in_raw/example.txt	0	6	after	IN	(PP*	-	-	-	-	*	-
+in_raw/example.txt	0	7	it	PRP	(NP*))	-	-	-	-	*	-
+in_raw/example.txt	0	8	,	,	*	-	-	-	-	*	-
+in_raw/example.txt	0	9	never	RB	(S(ADVP*)	-	-	-	-	*	-
+in_raw/example.txt	0	10	once	RB	(VP(ADVP*)	-	-	-	-	*	-
+in_raw/example.txt	0	11	considering	VBG	*	-	-	-	-	*	-
+in_raw/example.txt	0	12	how	WRB	(SBAR(WHADVP*)	-	-	-	-	*	-
+in_raw/example.txt	0	13	in	IN	(S(PP*	-	-	-	-	*	-
+in_raw/example.txt	0	14	the	DT	(NP*	-	-	-	-	*	-
+in_raw/example.txt	0	15	world	NN	*))	-	-	-	-	*	-
+in_raw/example.txt	0	16	she	PRP	(NP*)	-	-	-	-	*	(1)
+in_raw/example.txt	0	17	was	VBD	(VP*	-	-	-	-	*	-
+in_raw/example.txt	0	18	to	TO	(S(VP*	-	-	-	-	*	-
+in_raw/example.txt	0	19	get	VB	(VP*	-	-	-	-	*	-
+in_raw/example.txt	0	20	out	RP	(PRT*)	-	-	-	-	*	-
+in_raw/example.txt	0	21	again	RB	(ADVP*))))))))))	-	-	-	-	*	-
+in_raw/example.txt	0	22	.	.	*))	-	-	-	-	*	-
+
+#end document

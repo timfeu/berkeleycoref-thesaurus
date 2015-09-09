@@ -1,0 +1,110 @@
+*****************************************************************
+Instructions on using the system as an Apache UIMA analysis engine
+*****************************************************************
+
+The project includes an Analysis Engine that can be used in a pipeline of an
+Apache UIMA project (see http://uima.apache.org/ for more information).
+
+The system integrates well with DKPro (https://www.ukp.tu-darmstadt.de/software/dkpro-core),
+a suite of existing processing tools adapted to UIMA.
+
+Given that the Coreferene System is on the classpath (either from the
+standalone libs or from a Maven repository, see also HOWTO_BUILD.txt),
+you can create an example pipeline using OpenNLP for preprocessing as
+follows:
+
+--
+
+import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceChain;
+import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpNameFinder;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpParser;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpSegmenter;
+import org.apache.uima.UIMAException;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.cas.CASException;
+import org.apache.uima.fit.component.CasDumpWriter;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
+import org.apache.uima.fit.factory.JCasFactory;
+import org.apache.uima.fit.pipeline.SimplePipeline;
+import org.apache.uima.fit.util.JCasUtil;
+import org.apache.uima.jcas.JCas;
+import org.jobimtext.coref.berkeley.uima.ConfigurationParameters;
+import org.jobimtext.coref.berkeley.uima.CoreferenceAnalysisEngine;
+
+public class Main {
+    public static void main(String[] args) throws UIMAException {
+        JCas jCas = JCasFactory.createJCas();
+        jCas.setDocumentLanguage("en");
+        jCas.setDocumentText("Alice met Bob at the local science fair. He is a big fan of" +
+                " aviation, so he was happy to see so many airplanes at the fair.");
+
+        AnalysisEngine seg = AnalysisEngineFactory.createEngine(OpenNlpSegmenter.class);
+        AnalysisEngine pos = AnalysisEngineFactory.createEngine(OpenNlpPosTagger.class);
+        AnalysisEngine parse = AnalysisEngineFactory.createEngine(OpenNlpParser.class);
+        AnalysisEngine ner = AnalysisEngineFactory.createEngine(OpenNlpNameFinder.class);
+
+        AnalysisEngine coref = AnalysisEngineFactory.createEngine(CoreferenceAnalysisEngine.class,
+                ConfigurationParameters.DT_CONF_PATH_PARAM, "not.existing", // path to thesaurus configuration; no thesaurus loaded if not existing
+                ConfigurationParameters.PRUNING_STRATEGY_PARAM, "distance:1000:500" // compare only with
+                // last 1000 mentions, go only 500 sentences back in case of pronouns
+                );
+
+        AnalysisEngine out = AnalysisEngineFactory.createEngine(CasDumpWriter.class);
+
+        SimplePipeline.runPipeline(jCas, seg, pos, parse, ner, coref, out);
+
+        System.out.println("-- Coreference Chains --");
+
+        StringBuilder sb = new StringBuilder();
+
+        for (CoreferenceChain chain : JCasUtil.select(jCas, CoreferenceChain.class)) {
+            writeChain(sb, chain.getFirst());
+        }
+
+        System.out.println(sb);
+    }
+
+    private static void writeChain(StringBuilder sb, CoreferenceLink link) throws CASException {
+        if (link == null) {
+            // recursion anchor
+            sb.append("(end)\n");
+        } else {
+            sb.append(link.getCoveredText());
+            sb.append(" <-- ");
+            writeChain(sb, link.getNext());
+        }
+    }
+}
+
+--
+
+Note that named entity recognition is not required for the standard models;
+the Berkeley System uses it primarly to detect additional mentions not covered
+by NPs.
+
+The setting above tries to automatically locate a standard model (Berkeley
+Final) and number gender data from the classpath.
+
+You can specify a local model by providing two additonal configuration parameters
+to the "createEngine()" method:
+
+---
+AnalysisEngine coref = AnalysisEngineFactory.createEngine(CoreferenceAnalysisEngine.class,
+                ConfigurationParameters.DT_CONF_PATH_PARAM, "not.existing", // path to thesaurus configuration; no thesaurus loaded if not existing
+                ConfigurationParameters.PRUNING_STRATEGY_PARAM, "distance:1000:500" // compare only with
+                // last 1000 mentions, go only 500 sentences back in case of pronouns
+                
+                // NEW
+                ConfigurationParameters.MODEL_LOCATION_PARAM, new File("models/berkeley.ser.gz").toURI().toString(),
+                ConfigurationParameters.NUMBER_GENDER_DATA_PARAM, new File("data/gender.data.gz").toURI().toString(),
+
+                );
+
+---
+
+If the models are uncompressed, make sure to also set MODEL_IS_GZIPPED_PARAM and
+NUMBER_GENDER_DATA_IS_GZIPPED_PARAM to false.
+
+

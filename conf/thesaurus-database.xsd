@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.jobimtext.org/database"
+xmlns="http://www.jobimtext.org/database"
+elementFormDefault="qualified"
+xml:lang="en">
+
+  <xsd:annotation>
+    <xsd:documentation>
+     Configuration file for connections to a thesaurus database.
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:element name="databaseThesaurusConfiguration" type="DatabaseThesaurusConfigurationType" />
+  
+  <xsd:complexType name="DatabaseThesaurusConfigurationType">
+    <xsd:all>
+	  <xsd:element name="tables" type="TableList" minOccurs="1" maxOccurs="1" />
+	  <xsd:element name="dbUrl" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	  <xsd:element name="dbUser" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	  <xsd:element name="dbPassword" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	  <xsd:element name="jdbcString" type="xsd:string" minOccurs="1" maxOccurs="1" />
+	  
+	    <xsd:element name="similarTermsQuery" type="xsd:string" />
+		<xsd:element name="similarTermsTopQuery" type="xsd:string" />
+		<xsd:element name="similarTermsGtScoreQuery" type="xsd:string" />
+		<xsd:element name="similarTermScoreQuery" type="xsd:string" />
+		<xsd:element name="similarContextsQuery" type="xsd:string" />
+		<xsd:element name="similarContextsTopQuery" type="xsd:string" />
+		<xsd:element name="similarContextsGtScoreQuery" type="xsd:string" />
+		<xsd:element name="termsCountQuery" type="xsd:string" />
+		<xsd:element name="contextsCountQuery" type="xsd:string" />
+		<xsd:element name="termContextsCountQuery" type="xsd:string" />
+		<xsd:element name="termContextsScoreQuery" type="xsd:string" />
+		<xsd:element name="batchTermContextsScoreQuery" type="xsd:string" />
+		<xsd:element name="termContextsScoresQuery" type="xsd:string" />
+		<xsd:element name="termContextsScoresTopQuery" type="xsd:string" />
+		<xsd:element name="termContextsScoresGtScoreQuery" type="xsd:string" />
+		<xsd:element name="sensesQuery" type="xsd:string" />
+		<xsd:element name="senseCUIsQuery" type="xsd:string" />
+		<xsd:element name="isasQuery" type="xsd:string" />
+		<xsd:element name="contextTermsScoresQuery" type="xsd:string" />
+	  </xsd:all>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TableList">
+    <xsd:sequence>
+      <xsd:element name="tableSimilarTerms" type="xsd:string" />
+      <xsd:element name="tableSimilarContexts" type="xsd:string" />
+      <xsd:element name="tableTermContextsScore" type="xsd:string" />
+      <xsd:element name="tableContextsCount" type="xsd:string" />
+      <xsd:element name="tableTermCount" type="xsd:string" />
+      <xsd:element name="tableSenses" type="xsd:string" />
+      <xsd:element name="tableIsas" type="xsd:string" />
+      <xsd:element name="tableSenseCUIs" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  
+</xsd:schema>
