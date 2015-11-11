@@ -10,7 +10,7 @@ description := "Modification of the Berkeley Coreference Resolution System that 
   "engine" +
   " and access to distributional thesauri by the JoBimText project."
 
-version := "1.0-SNAPSHOT"
+version := "1.1-SNAPSHOT"
 // add the following repository if you want to use the system from within Maven; also uncomment futile and berkeleyparser
 // dependencies below
 //resolvers += "Bintray futile repository" at "http://dl.bintray.com/grubeninspekteur/maven"

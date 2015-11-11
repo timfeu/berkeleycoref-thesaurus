@@ -1,6 +1,6 @@
 package edu.berkeley.nlp.coref
 
-import java.io.{IOException, ObjectOutputStream, FileReader}
+import java.io.{ObjectInputStream, IOException, ObjectOutputStream, FileReader}
 
 import org.jobimtext.coref.berkeley.DistributionalThesaurusComputer.AttributeIncompatibilityResult
 import org.jobimtext.coref.berkeley.bansalklein.BansalKleinFeaturizer
@@ -27,7 +27,7 @@ class PairwiseIndexingFeaturizerJoint(val featureIndexer: Indexer[String],
 PairwiseIndexingFeaturizer with
 Serializable {
 
-  val bkFeaturizer = BansalKleinFeaturizer(this)
+  var bkFeaturizer = BansalKleinFeaturizer(this)
 
   /**
    * Creates a copy of this featurizer, and sets its mention property computer to the given value.
@@ -1073,7 +1073,13 @@ Serializable {
   @throws(classOf[IOException])
   private def writeObject(out: ObjectOutputStream): Unit = {
     _prop = null
+    bkFeaturizer = null
     out.defaultWriteObject()
+  }
+
+  private def readObject(in: ObjectInputStream): Unit = {
+    in.defaultReadObject()
+    bkFeaturizer = BansalKleinFeaturizer(this)
   }
 
   override def getPairwiseFeatsEnabled: String = featsToUse

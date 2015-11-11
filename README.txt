@@ -1,4 +1,4 @@
-Download precompiled system with all dependencies: https://github.com/timfeu/berkeleycoref-thesaurus/releases/download/v1.0/berkeleycoref-1.0d.zip
+Download precompiled system with all dependencies: https://github.com/timfeu/berkeleycoref-thesaurus/releases/download/v1.1/berkeleycoref-1.1d.zip
 
 Bansal & Klein feature extractors: https://github.com/timfeu/berkeleycoref-bansalklein
 
@@ -68,7 +68,10 @@ Copyright (c) 2012 IBM Corp. and FG Language Technology, Technische Universität
 Update Log
 ----------
 
-2015-??-??: Initial release of modified version.
+2015-11-11:
+-- Fixed models not being saved/loaded.
+
+2015-09-09: Initial release of modified version.
 
 2013-11-11: Version 1.0
 --Demonstrative pronouns are handled slightly differently in the featurization (helps slightly).
